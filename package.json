@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "serve .",
+    "dev": "vite",
     "test": "node --test"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
-    "serve": "^14.2.6"
+    "vite": "^8.0.13"
   }
 }
