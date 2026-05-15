@@ -48,7 +48,9 @@
     font-size: 12px;
   }
 </style>
-<link rel="stylesheet" href="../assets/styles/common.css">
+<link rel="stylesheet" href="../assets/styles/tokens.css">
+<link rel="stylesheet" href="../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../assets/components/tool-header/index.css">
 </head>
 <body class="tool-page">
 <main>
@@ -123,7 +125,7 @@
   </section>
 </main>
 <script type="module">
-import { mount as mountToolHeader } from '../assets/components/tool-header.js';
+import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
 mountToolHeader({ title: '图标预览' });
 </script>
 </body>

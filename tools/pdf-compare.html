@@ -184,8 +184,11 @@
     font-size: 13px;
   }
 </style>
-<link rel="stylesheet" href="../assets/styles/common.css">
-<link rel="stylesheet" href="../assets/components/dropdown-single-select.css">
+<link rel="stylesheet" href="../assets/styles/tokens.css">
+<link rel="stylesheet" href="../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../assets/components/tool-header/index.css">
+<link rel="stylesheet" href="../assets/components/file-input/index.css">
+<link rel="stylesheet" href="../assets/components/dropdown-single-select/index.css">
 </head>
 <body class="tool-page">
 <div id="header-controls" hidden>
@@ -206,9 +209,9 @@
 
 <script src="../vendor/pdfjs/pdf.min.js"></script>
 <script type="module">
-import { mount as mountToolHeader } from '../assets/components/tool-header.js';
-import { bind as bindFileInputDropZone } from '../assets/components/file-input.js';
-import { mount as mountDropdownSingleSelect } from '../assets/components/dropdown-single-select.js';
+import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
+import { bind as bindFileInputDropZone } from '../assets/components/file-input/index.js';
+import { mount as mountDropdownSingleSelect } from '../assets/components/dropdown-single-select/index.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
 

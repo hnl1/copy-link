@@ -1,0 +1,25 @@
+body.card-page {
+  background: linear-gradient(135deg, var(--bg) 0%, var(--bg-drop) 100%);
+  color: var(--text);
+}
+
+body.card-page .main-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-hover);
+}
+
+body.card-page .input {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+body.card-page .label,
+body.card-page .header h1 {
+  color: var(--text);
+}
+
+body.card-page .header p {
+  color: var(--text-muted);
+}

@@ -3,10 +3,10 @@ import test from "node:test";
 import { read, toolPages } from "./_helpers.js";
 
 test("工具页都通过共享 ToolHeader 模块挂载（ToolHeader 内部统一引入 home-link）", () => {
-  const toolHeaderSrc = read("assets/components/tool-header.js");
+  const toolHeaderSrc = read("assets/components/tool-header/index.js");
   assert.match(
     toolHeaderSrc,
-    /from\s+['"]\.\/home-link\.js['"]/,
+    /from\s+['"]\.\.\/home-link\.js['"]/,
     "tool-header.js should import home-link.js"
   );
 
@@ -14,7 +14,7 @@ test("工具页都通过共享 ToolHeader 模块挂载（ToolHeader 内部统一
     const html = read(page);
     assert.match(
       html,
-      /from\s+['"]\.\.\/assets\/components\/tool-header\.js['"]/,
+      /from\s+['"]\.\.\/assets\/components\/tool-header\/index\.js['"]/,
       `${page} should import the shared tool-header module`
     );
     assert.match(
@@ -26,7 +26,7 @@ test("工具页都通过共享 ToolHeader 模块挂载（ToolHeader 内部统一
 });
 
 test(".tool-header 是 sticky", () => {
-  const css = read("assets/styles/common.css");
+  const css = read("assets/components/tool-header/index.css");
   assert.match(css, /\.tool-header\s*\{[\s\S]*position:\s*sticky;/);
   assert.match(css, /\.tool-header\s*\{[\s\S]*top:\s*0;/);
 });

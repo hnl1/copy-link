@@ -1,0 +1,45 @@
+.tool-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 8px 10px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.tool-header h1 {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.tool-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.tool-header button:not(.icon-btn),
+.tool-header .button:not(.icon-btn),
+.tool-header .tool-button {
+  padding: var(--tool-button-padding-block) var(--tool-button-padding-inline);
+  font-size: var(--tool-button-font-size);
+  line-height: var(--tool-button-line-height);
+}
+
+.tool-header .file-input-split-trigger .file-input-trigger {
+  padding-right: 10px;
+}

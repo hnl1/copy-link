@@ -1,7 +1,7 @@
 /**
  * 通用下拉单选：按钮展示当前项 + 面板中选一项带右侧勾选。
  * 选项、当前值、默认值均由调用方传入。
- * 样式见同目录 dropdown-single-select.css（须在 common.css 之后加载）。
+ * 样式见同目录 dropdown-single-select.css（须在 tool-page.css 之后加载）。
  */
 function toElement(host) {
   if (!host) return null;

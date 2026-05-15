@@ -1,5 +1,5 @@
 /**
- * 下拉单选组件样式。须在 common.css 之后引入，
+ * 下拉单选组件样式。须在 tool-page.css 之后引入，
  * 以覆盖 body.tool-page 对普通 button 的全局描边/圆角/阴影。
  */
 

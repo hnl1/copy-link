@@ -242,7 +242,10 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 </style>
-<link rel="stylesheet" href="../assets/styles/common.css">
+<link rel="stylesheet" href="../assets/styles/tokens.css">
+<link rel="stylesheet" href="../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../assets/components/tool-header/index.css">
+<link rel="stylesheet" href="../assets/components/file-input/index.css">
 </head>
 <body class="tool-page">
 <div id="header-controls" hidden>
@@ -268,8 +271,8 @@
 </div>
 
 <script type="module">
-import { mount as mountToolHeader } from '../assets/components/tool-header.js';
-import { bind as bindFileInputDropZone } from '../assets/components/file-input.js';
+import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
+import { bind as bindFileInputDropZone } from '../assets/components/file-input/index.js';
 (() => {
   const headerControlsHost = document.getElementById('header-controls');
   const { clearBtn } = mountToolHeader({

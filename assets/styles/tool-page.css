@@ -1,0 +1,87 @@
+body.tool-page {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body.tool-page > main {
+  width: 100%;
+}
+
+body.tool-page button:not(.icon-btn),
+body.tool-page .button:not(.icon-btn),
+body.tool-page .tool-button {
+  background: var(--button-bg);
+  color: var(--text);
+  border: 1px solid var(--button-border);
+  border-radius: var(--tool-button-radius);
+  box-shadow: var(--shadow);
+  transition: background var(--ft-transition), border-color var(--ft-transition),
+    color var(--ft-transition), transform var(--ft-transition);
+}
+
+body.tool-page button:not(.icon-btn):not(:disabled):hover,
+body.tool-page .button:not(.icon-btn):not(:disabled):hover {
+  background: var(--button-hover);
+  border-color: var(--accent);
+}
+
+body.tool-page .button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+body.tool-page .button.primary:not(:disabled):hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+body.tool-page button.danger:not(.icon-btn),
+body.tool-page .button.danger:not(.icon-btn) {
+  color: var(--danger, #dc2626);
+}
+
+body.tool-page button.danger:not(.icon-btn):hover:not(:disabled) {
+  border-color: var(--danger-border, var(--accent));
+  background: var(--danger-hover-bg, var(--button-hover));
+}
+
+body.tool-page button:disabled,
+body.tool-page .button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+body.tool-page input[type="file"],
+body.tool-page input[type="number"],
+body.tool-page select {
+  background: var(--button-bg);
+  color: var(--text);
+  border: 1px solid var(--button-border);
+  border-radius: var(--ft-radius-sm);
+}
+
+body.tool-page #drop-hint,
+body.tool-page .empty {
+  background: var(--surface);
+  border-color: var(--button-border);
+  border-radius: var(--ft-radius-lg);
+  color: var(--text-faint);
+  box-shadow: var(--shadow);
+}
+
+body.tool-page #drop-hint.dragging {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-tint);
+}
+
+body.tool-page .cell,
+body.tool-page .panel,
+body.tool-page .preview {
+  background: var(--surface);
+  border-color: var(--border);
+  border-radius: var(--ft-radius-md);
+  box-shadow: var(--shadow);
+}

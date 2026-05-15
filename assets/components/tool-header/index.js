@@ -1,6 +1,6 @@
-import { create as createHomeLink } from './home-link.js';
-import { create as createThemeToggle } from './theme-toggle.js';
-import { create as createClearButton } from './clear-button.js';
+import { create as createHomeLink } from '../home-link.js';
+import { create as createThemeToggle } from '../theme-toggle.js';
+import { createClearButton } from '../file-input/index.js';
 
 export function mount(options) {
   options = options || {};

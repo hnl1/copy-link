@@ -3,7 +3,7 @@ import test from "node:test";
 import { read, fileInputPages, loadDom } from "./_helpers.js";
 
 test("共享 .file-drop-zone 样式齐全", () => {
-  const css = read("assets/styles/common.css");
+  const css = read("assets/components/file-input/index.css");
   for (const selector of [
     /\.file-drop-zone\s*\{/,
     /\.file-drop-zone:hover/,
@@ -20,7 +20,7 @@ test("共享 .file-drop-zone 样式齐全", () => {
 });
 
 test("file-input.js 暴露 drop zone trigger API（triggerElement / 键盘可达）", () => {
-  const script = read("assets/components/file-input.js");
+  const script = read("assets/components/file-input/index.js");
   assert.match(script, /options\.triggerElement/);
   assert.match(script, /setAttribute\('tabindex', '0'\)/);
   assert.match(script, /setAttribute\('role', 'button'\)/);
@@ -28,7 +28,7 @@ test("file-input.js 暴露 drop zone trigger API（triggerElement / 键盘可达
 });
 
 test("file-input.js 支持目录选择", () => {
-  const script = read("assets/components/file-input.js");
+  const script = read("assets/components/file-input/index.js");
   for (const expected of [
     /webkitdirectory/,
     /createDirectoryInput/,
@@ -55,7 +55,7 @@ for (const page of fileInputPages) {
     const { document } = dom.window;
 
     const hasSharedImport = [...document.querySelectorAll('script[type="module"]')].some((s) =>
-      /from\s+['"][^'"]*assets\/components\/file-input\.js['"]/.test(s.textContent || "")
+      /from\s+['"][^'"]*assets\/components\/file-input\/index\.js['"]/.test(s.textContent || "")
     );
     assert.ok(hasSharedImport, `${page} should import the shared file input module`);
 

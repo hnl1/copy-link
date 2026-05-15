@@ -7,13 +7,16 @@ import { abs, exists, read, pages, toolPages, hiddenPages } from "./_helpers.js"
 test("图标渲染细节只在 assets/styles/icon-button.css 内（消费方不能直接写 mask / --icon-url）", () => {
   // .icon-{name} 是图标的唯一对外接口；其它文件不能写 mask / --icon-url / var(--icon-X)。
   const filesToCheck = [
-    "assets/styles/common.css",
+    "assets/styles/tokens.css",
+    "assets/styles/tool-page.css",
+    "assets/styles/card-page.css",
     "assets/styles/icons.css",
-    "assets/components/clear-button.js",
-    "assets/components/file-input.js",
+    "assets/components/tool-header/index.css",
+    "assets/components/tool-header/index.js",
+    "assets/components/file-input/index.css",
+    "assets/components/file-input/index.js",
     "assets/components/home-link.js",
     "assets/components/theme-toggle.js",
-    "assets/components/tool-header.js",
     "index.html",
     ...toolPages,
   ];
@@ -36,15 +39,15 @@ test("图标渲染细节只在 assets/styles/icon-button.css 内（消费方不�
   }
 });
 
-test("图标定义集中在 assets/styles/icons.css，common.css 通过 @import 引入", () => {
-  const commonCss = read("assets/styles/common.css");
+test("图标定义集中在 assets/styles/icons.css，tokens.css 通过 @import 引入", () => {
+  const tokensCss = read("assets/styles/tokens.css");
   const iconCss = read("assets/styles/icons.css");
   const iconButtonCss = read("assets/styles/icon-button.css");
   const iconPage = read("tools/icons.html");
 
-  assert.match(commonCss, /@import url\("\.\/icons\.css"\);/);
-  assert.match(commonCss, /@import url\("\.\/icon-button\.css"\);/);
-  assert.doesNotMatch(commonCss, /--icon-(?:home|computer|sun|moon|trash|close):\s*url\(/);
+  assert.match(tokensCss, /@import url\("\.\/icons\.css"\);/);
+  assert.match(tokensCss, /@import url\("\.\/icon-button\.css"\);/);
+  assert.doesNotMatch(tokensCss, /--icon-(?:home|computer|sun|moon|trash|close):\s*url\(/);
 
   for (const icon of ["home", "computer", "sun", "moon", "trash", "close"]) {
     assert.match(iconCss, new RegExp(`--icon-${icon}:\\s*url\\(`));

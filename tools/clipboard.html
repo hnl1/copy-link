@@ -481,7 +481,9 @@
             outline-offset: 2px;
         }
     </style>
-    <link rel="stylesheet" href="../assets/styles/common.css">
+    <link rel="stylesheet" href="../assets/styles/tokens.css">
+    <link rel="stylesheet" href="../assets/styles/card-page.css">
+    <link rel="stylesheet" href="../assets/components/tool-header/index.css">
 </head>
 <body class="card-page">
     <div class="container">
@@ -526,7 +528,7 @@
     </div>
 
     <script type="module">
-        import { mount as mountToolHeader } from '../assets/components/tool-header.js';
+        import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
 
         class ClipboardLinkManager {
             constructor() {
