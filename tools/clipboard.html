@@ -4,11 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>剪切板链接管理器</title>
-    <script src="../assets/icons/favicons.js"></script>
-    <script src="../assets/theme-toggle.js"></script>
-    <script src="../assets/home-link.js"></script>
-    <script src="../assets/clear-button.js"></script>
-    <script src="../assets/tool-header.js"></script>
+    <script src="../assets/theme-init.js"></script>
+    <script type="module" src="../assets/favicons.js"></script>
     <style>
         :root {
             --primary-500: #3b82f6;
@@ -484,7 +481,7 @@
             outline-offset: 2px;
         }
     </style>
-    <link rel="stylesheet" href="../assets/common.css">
+    <link rel="stylesheet" href="../assets/styles/common.css">
 </head>
 <body class="card-page">
     <div class="container">
@@ -528,8 +525,9 @@
         </div>
     </div>
 
-    <script>
-        // 极简剪切板链接管理器
+    <script type="module">
+        import { mount as mountToolHeader } from '../assets/components/tool-header.js';
+
         class ClipboardLinkManager {
             constructor() {
                 this.nameInput = document.getElementById('linkName');
@@ -969,7 +967,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            ToolHeader.mount({ title: '剪切板链接管理器' });
+            mountToolHeader({ title: '剪切板链接管理器' });
             new ClipboardLinkManager();
         });
     </script>

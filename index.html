@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>f-tools · 前端小工具集</title>
-    <script src="assets/icons/favicons.js"></script>
-    <script src="assets/theme-toggle.js"></script>
+    <script src="assets/theme-init.js"></script>
+    <script type="module" src="assets/favicons.js"></script>
     <style>
         :root[data-theme="light"] {
             color-scheme: light;
@@ -185,7 +185,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="assets/common.css">
+    <link rel="stylesheet" href="assets/styles/common.css">
 </head>
 <body class="home-page">
     <div class="container">
@@ -245,8 +245,9 @@
         </footer>
     </div>
 
-    <script>
-        document.getElementById('theme-toggle-host').appendChild(ThemeToggle.create());
+    <script type="module">
+        import { create as createThemeToggle } from './assets/components/theme-toggle.js';
+        document.getElementById('theme-toggle-host').appendChild(createThemeToggle());
     </script>
 </body>
 </html>

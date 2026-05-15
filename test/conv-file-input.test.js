@@ -3,7 +3,7 @@ import test from "node:test";
 import { read, fileInputPages, loadDom } from "./_helpers.js";
 
 test("共享 .file-drop-zone 样式齐全", () => {
-  const css = read("assets/common.css");
+  const css = read("assets/styles/common.css");
   for (const selector of [
     /\.file-drop-zone\s*\{/,
     /\.file-drop-zone:hover/,
@@ -20,7 +20,7 @@ test("共享 .file-drop-zone 样式齐全", () => {
 });
 
 test("file-input.js 暴露 drop zone trigger API（triggerElement / 键盘可达）", () => {
-  const script = read("assets/file-input.js");
+  const script = read("assets/components/file-input.js");
   assert.match(script, /options\.triggerElement/);
   assert.match(script, /setAttribute\('tabindex', '0'\)/);
   assert.match(script, /setAttribute\('role', 'button'\)/);
@@ -28,7 +28,7 @@ test("file-input.js 暴露 drop zone trigger API（triggerElement / 键盘可达
 });
 
 test("file-input.js 支持目录选择", () => {
-  const script = read("assets/file-input.js");
+  const script = read("assets/components/file-input.js");
   for (const expected of [
     /webkitdirectory/,
     /createDirectoryInput/,
@@ -54,10 +54,10 @@ for (const page of fileInputPages) {
     const dom = await loadDom(page);
     const { document } = dom.window;
 
-    const hasSharedScript = [...document.querySelectorAll("script[src]")].some((s) =>
-      s.getAttribute("src").endsWith("assets/file-input.js")
+    const hasSharedImport = [...document.querySelectorAll('script[type="module"]')].some((s) =>
+      /from\s+['"][^'"]*assets\/components\/file-input\.js['"]/.test(s.textContent || "")
     );
-    assert.ok(hasSharedScript, `${page} should load shared file input script`);
+    assert.ok(hasSharedImport, `${page} should import the shared file input module`);
 
     const dropZone = document.querySelector(".file-drop-zone");
     assert.ok(dropZone, `${page} should include shared drop zone element`);
@@ -88,7 +88,7 @@ for (const page of fileInputPages) {
     }
 
     const html = read(page);
-    assert.match(html, /FileInputDropZone\.bind\(/);
+    assert.match(html, /\bbindFileInputDropZone\s*\(/);
     assert.match(html, /\btriggerElement:\s*dropHint/);
 
     dom.window.close();

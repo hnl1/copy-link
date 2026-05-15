@@ -16,7 +16,7 @@ import {
   createLocalFileHeader,
   createCentralDirectoryHeader,
   createZipBlob,
-} from "../assets/pdf-to-image-utils.js";
+} from "../tools/pdf-to-image-utils.js";
 
 test("isPdfFile recognises PDFs by mime or extension", () => {
   assert.equal(isPdfFile({ type: "application/pdf", name: "a.pdf" }), true);

@@ -3,9 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "serve .",
     "test": "node --test"
   },
   "devDependencies": {
-    "jsdom": "^29.1.1"
+    "jsdom": "^29.1.1",
+    "serve": "^14.2.6"
   }
 }

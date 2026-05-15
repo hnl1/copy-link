@@ -2,19 +2,18 @@ import assert from "node:assert/strict";
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import vm from "node:vm";
 import { abs, exists, read, pages, toolPages, hiddenPages } from "./_helpers.js";
 
-test("图标渲染细节只在 assets/icon-button.css 内（消费方不能直接写 mask / --icon-url）", () => {
+test("图标渲染细节只在 assets/styles/icon-button.css 内（消费方不能直接写 mask / --icon-url）", () => {
   // .icon-{name} 是图标的唯一对外接口；其它文件不能写 mask / --icon-url / var(--icon-X)。
   const filesToCheck = [
-    "assets/common.css",
-    "assets/icons.css",
-    "assets/clear-button.js",
-    "assets/file-input.js",
-    "assets/home-link.js",
-    "assets/theme-toggle.js",
-    "assets/tool-header.js",
+    "assets/styles/common.css",
+    "assets/styles/icons.css",
+    "assets/components/clear-button.js",
+    "assets/components/file-input.js",
+    "assets/components/home-link.js",
+    "assets/components/theme-toggle.js",
+    "assets/components/tool-header.js",
     "index.html",
     ...toolPages,
   ];
@@ -31,16 +30,16 @@ test("图标渲染细节只在 assets/icon-button.css 内（消费方不能直�
       assert.doesNotMatch(
         content,
         pattern,
-        `${file} 不应该包含 ${label}——图标渲染细节应只在 assets/icon-button.css 内`
+        `${file} 不应该包含 ${label}——图标渲染细节应只在 assets/styles/icon-button.css 内`
       );
     }
   }
 });
 
-test("图标定义集中在 assets/icons.css，common.css 通过 @import 引入", () => {
-  const commonCss = read("assets/common.css");
-  const iconCss = read("assets/icons.css");
-  const iconButtonCss = read("assets/icon-button.css");
+test("图标定义集中在 assets/styles/icons.css，common.css 通过 @import 引入", () => {
+  const commonCss = read("assets/styles/common.css");
+  const iconCss = read("assets/styles/icons.css");
+  const iconButtonCss = read("assets/styles/icon-button.css");
   const iconPage = read("tools/icons.html");
 
   assert.match(commonCss, /@import url\("\.\/icons\.css"\);/);
@@ -54,18 +53,15 @@ test("图标定义集中在 assets/icons.css，common.css 通过 @import 引入"
   }
 });
 
-function loadFaviconMap() {
-  const sandbox = { window: {} };
-  vm.createContext(sandbox);
-  vm.runInContext(read("assets/icons/favicons.js"), sandbox);
-  const MAP = sandbox.window.Favicons && sandbox.window.Favicons.MAP;
-  assert.ok(MAP && typeof MAP === "object", "favicons.js should expose Favicons.MAP");
-  return MAP;
+async function loadFaviconMap() {
+  const mod = await import(new URL("../assets/favicons.js", import.meta.url));
+  assert.ok(mod.MAP && typeof mod.MAP === "object", "favicons.js should export MAP");
+  return mod.MAP;
 }
 
-test("favicon 配置覆盖每个页面，且每个页面都加载 favicons.js", () => {
-  assert.ok(exists("assets/icons/favicons.js"), "assets/icons/favicons.js should exist");
-  const MAP = loadFaviconMap();
+test("favicon 配置覆盖每个页面，且每个页面都加载 favicons.js", async () => {
+  assert.ok(exists("assets/favicons.js"), "assets/favicons.js should exist");
+  const MAP = await loadFaviconMap();
 
   for (const page of pages) {
     assert.ok(
@@ -80,11 +76,11 @@ test("favicon 配置覆盖每个页面，且每个页面都加载 favicons.js", 
 
   for (const page of pages) {
     const html = read(page);
-    const expectedSrc = page === "index.html" ? "assets/icons/favicons.js" : "../assets/icons/favicons.js";
+    const expectedSrc = page === "index.html" ? "assets/favicons.js" : "../assets/favicons.js";
     assert.match(
       html,
-      new RegExp(`<script src="${expectedSrc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"></script>`),
-      `${page} should load the shared favicon config script`
+      new RegExp(`<script type="module" src="${expectedSrc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"></script>`),
+      `${page} should load the shared favicon module`
     );
     assert.doesNotMatch(
       html,
@@ -94,8 +90,8 @@ test("favicon 配置覆盖每个页面，且每个页面都加载 favicons.js", 
   }
 });
 
-test("首页 card / footer 图标 emoji 与 favicons.js MAP 一致", () => {
-  const MAP = loadFaviconMap();
+test("首页 card / footer 图标 emoji 与 favicons.js MAP 一致", async () => {
+  const MAP = await loadFaviconMap();
   const html = read("index.html");
 
   for (const page of toolPages) {
@@ -120,6 +116,8 @@ test("首页 card / footer 图标 emoji 与 favicons.js MAP 一致", () => {
 const SVG_SOURCE_DIRS = ["assets", "tools"];
 const SVG_SOURCE_EXTRA_FILES = ["index.html"];
 const SVG_SOURCE_SKIP_DIRS = new Set(["assets/icons", "vendor", "node_modules", "test"]);
+// favicons.js 用 data:image/svg+xml 字符串生成 emoji favicon，是合法例外
+const SVG_SOURCE_SKIP_FILES = new Set(["assets/favicons.js"]);
 const SVG_SOURCE_EXTENSIONS = new Set([".html", ".css", ".js", ".mjs", ".ts"]);
 
 function listSourceFiles() {
@@ -137,7 +135,9 @@ function listSourceFiles() {
         walk(relChild);
         continue;
       }
-      if (SVG_SOURCE_EXTENSIONS.has(path.extname(name))) results.add(relChild);
+      if (SVG_SOURCE_EXTENSIONS.has(path.extname(name)) && !SVG_SOURCE_SKIP_FILES.has(relChild)) {
+        results.add(relChild);
+      }
     }
   };
   for (const dir of SVG_SOURCE_DIRS) walk(dir);

@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>PDF 对比</title>
-<script src="../assets/icons/favicons.js"></script>
-<script src="../assets/theme-toggle.js"></script>
-<script src="../assets/home-link.js"></script>
-<script src="../assets/clear-button.js"></script>
-<script src="../assets/tool-header.js"></script>
+<script src="../assets/theme-init.js"></script>
+<script type="module" src="../assets/favicons.js"></script>
 <style>
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -187,8 +184,8 @@
     font-size: 13px;
   }
 </style>
-<link rel="stylesheet" href="../assets/common.css">
-<link rel="stylesheet" href="../assets/dropdown-single-select.css">
+<link rel="stylesheet" href="../assets/styles/common.css">
+<link rel="stylesheet" href="../assets/components/dropdown-single-select.css">
 </head>
 <body class="tool-page">
 <div id="header-controls" hidden>
@@ -208,14 +205,16 @@
 <div id="grid" style="display:none"></div>
 
 <script src="../vendor/pdfjs/pdf.min.js"></script>
-<script src="../assets/file-input.js"></script>
-<script src="../assets/dropdown-single-select.js"></script>
-<script>
+<script type="module">
+import { mount as mountToolHeader } from '../assets/components/tool-header.js';
+import { bind as bindFileInputDropZone } from '../assets/components/file-input.js';
+import { mount as mountDropdownSingleSelect } from '../assets/components/dropdown-single-select.js';
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
 
 (() => {
   const headerControlsHost = document.getElementById('header-controls');
-  const { clearBtn } = ToolHeader.mount({
+  const { clearBtn } = mountToolHeader({
     title: 'PDF 对比',
     controls: Array.from(headerControlsHost.children),
     clearButton: { onClear: () => clearAll() },
@@ -238,7 +237,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
     { value: 'page', label: '按页码同步' },
     { value: 'off', label: '关闭同步' },
   ];
-  const syncSelect = DropdownSingleSelect.mount({
+  const syncSelect = mountDropdownSingleSelect({
     host: '#pdf-sync-dropdown-host',
     title: '同步滚动方式',
     options: SYNC_MODES,
@@ -250,7 +249,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
     clearBtn.setCount(items.length);
   }
   updateClearBtn();
-  fileDropZone = FileInputDropZone.bind({
+  fileDropZone = bindFileInputDropZone({
     zone: dropHint,
     input: fileInput,
     triggerElement: dropHint,

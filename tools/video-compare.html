@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>视频对比</title>
-<script src="../assets/icons/favicons.js"></script>
-<script src="../assets/theme-toggle.js"></script>
-<script src="../assets/home-link.js"></script>
-<script src="../assets/clear-button.js"></script>
-<script src="../assets/tool-header.js"></script>
+<script src="../assets/theme-init.js"></script>
+<script type="module" src="../assets/favicons.js"></script>
 <style>
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -310,7 +307,7 @@
     pointer-events: none;
   }
 </style>
-<link rel="stylesheet" href="../assets/common.css">
+<link rel="stylesheet" href="../assets/styles/common.css">
 </head>
 <body class="tool-page">
 <div id="header-controls" hidden>
@@ -351,11 +348,12 @@
 <div id="zoom-resizer" title="拖动调整放大面板大小"></div>
 <div id="zoom-strip"></div>
 
-<script src="../assets/file-input.js"></script>
-<script>
+<script type="module">
+import { mount as mountToolHeader } from '../assets/components/tool-header.js';
+import { bind as bindFileInputDropZone } from '../assets/components/file-input.js';
 (() => {
   const headerControlsHost = document.getElementById('header-controls');
-  const { clearBtn } = ToolHeader.mount({
+  const { clearBtn } = mountToolHeader({
     title: '视频对比',
     controls: Array.from(headerControlsHost.children),
     clearButton: { onClear: () => clearAll() },
@@ -442,7 +440,7 @@
   }
   updateClearBtn();
 
-  fileDropZone = FileInputDropZone.bind({
+  fileDropZone = bindFileInputDropZone({
     zone: dropHint,
     input: fileInput,
     triggerElement: dropHint,

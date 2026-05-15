@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>图标预览</title>
-<script src="../assets/icons/favicons.js"></script>
-<script src="../assets/theme-toggle.js"></script>
-<script src="../assets/home-link.js"></script>
-<script src="../assets/tool-header.js"></script>
+<script src="../assets/theme-init.js"></script>
+<script type="module" src="../assets/favicons.js"></script>
 <style>
   .icon-gallery {
     width: min(960px, calc(100vw - 32px));
@@ -50,7 +48,7 @@
     font-size: 12px;
   }
 </style>
-<link rel="stylesheet" href="../assets/common.css">
+<link rel="stylesheet" href="../assets/styles/common.css">
 </head>
 <body class="tool-page">
 <main>
@@ -124,10 +122,9 @@
     </div>
   </section>
 </main>
-<script>
-(() => {
-  ToolHeader.mount({ title: '图标预览' });
-})();
+<script type="module">
+import { mount as mountToolHeader } from '../assets/components/tool-header.js';
+mountToolHeader({ title: '图标预览' });
 </script>
 </body>
 </html>
