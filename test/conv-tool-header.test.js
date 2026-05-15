@@ -2,14 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { read, toolPages } from "./_helpers.js";
 
-test("工具页都通过共享 ToolHeader 模块挂载（ToolHeader 内部统一引入 home-link）", () => {
-  const toolHeaderSrc = read("assets/components/tool-header/index.js");
-  assert.match(
-    toolHeaderSrc,
-    /from\s+['"]\.\.\/home-link\.js['"]/,
-    "tool-header.js should import home-link.js"
-  );
-
+test("工具页都通过共享 ToolHeader 模块挂载", () => {
   for (const page of toolPages) {
     const html = read(page);
     assert.match(

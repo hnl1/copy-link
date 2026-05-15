@@ -15,7 +15,6 @@ test("图标渲染细节只在 assets/styles/icon-button.css 内（消费方不�
     "assets/components/tool-header/index.js",
     "assets/components/file-input/index.css",
     "assets/components/file-input/index.js",
-    "assets/components/home-link.js",
     "assets/components/theme-toggle.js",
     "index.html",
     ...toolPages,

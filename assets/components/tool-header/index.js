@@ -1,6 +1,16 @@
-import { create as createHomeLink } from '../home-link.js';
 import { create as createThemeToggle } from '../theme-toggle.js';
 import { createClearButton } from '../file-input/index.js';
+
+function createHomeLink(href, label) {
+  href = href || '../index.html';
+  label = label || '主页';
+  const a = document.createElement('a');
+  a.className = 'back-link icon-btn icon-home';
+  a.href = href;
+  a.setAttribute('aria-label', label);
+  a.title = label;
+  return a;
+}
 
 export function mount(options) {
   options = options || {};
