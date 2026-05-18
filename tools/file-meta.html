@@ -639,6 +639,14 @@ import { bind as bindFileInputDropZone } from '../assets/components/file-input/i
     return `比例 ${p.ppuX} : ${p.ppuY}（单位未知）`;
   }
 
+  function formatAspectRatio(width, height) {
+    const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+    const divisor = gcd(width, height);
+    const ratio = `${width / divisor}:${height / divisor}`;
+    if (ratio === '3:7') return `${ratio} / 9:21`;
+    return ratio === '7:3' ? `${ratio} / 21:9` : ratio;
+  }
+
   function el(tag, props, ...children) {
     const node = document.createElement(tag);
     if (props) {
@@ -671,7 +679,6 @@ import { bind as bindFileInputDropZone } from '../assets/components/file-input/i
     container.appendChild(el('section', { class: 'meta-section' },
       el('h2', { text: '文件' }),
       makeGrid([
-        ['文件名', file.name],
         ['大小', formatBytes(file.size)],
         ['MIME 类型', file.type || '（浏览器未识别）'],
         ['修改时间', file.lastModified ? formatDateLocal(file.lastModified) : null],
@@ -683,7 +690,7 @@ import { bind as bindFileInputDropZone } from '../assets/components/file-input/i
       container.appendChild(el('section', { class: 'meta-section' },
         el('h2', { text: '图像（IHDR）' }),
         makeGrid([
-          ['尺寸', `${h.width} × ${h.height} 像素`],
+          ['尺寸', `${h.width} × ${h.height} 像素（宽高比 ${formatAspectRatio(h.width, h.height)}）`],
           ['位深', `${h.bitDepth} bit`],
           ['颜色类型', `${COLOR_TYPES[h.colorType] ?? '未知'}（colorType ${h.colorType}）`],
           ['压缩方式', h.compression === 0 ? 'Deflate（标准）' : `未知（${h.compression}）`],
