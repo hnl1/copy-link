@@ -49,6 +49,13 @@ test("clipboard 工具不加载共享 file-input.js", () => {
   assert.doesNotMatch(read("tools/clipboard.html"), /assets\/file-input\.js/);
 });
 
+test("file-meta 支持 MP4 文件元信息", () => {
+  const html = read("tools/file-meta.html");
+  assert.match(html, /accept="[^"]*video\/mp4/);
+  assert.match(html, /\bisMp4\s*\(/);
+  assert.match(html, /\binspectMp4\s*\(/);
+});
+
 for (const page of fileInputPages) {
   test(`${page} 使用共享 drop zone`, async () => {
     const dom = await loadDom(page);
