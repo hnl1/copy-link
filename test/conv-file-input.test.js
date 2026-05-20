@@ -52,8 +52,31 @@ test("clipboard 工具不加载共享 file-input.js", () => {
 test("file-meta 支持 MP4 文件元信息", () => {
   const html = read("tools/file-meta.html");
   assert.match(html, /accept="[^"]*video\/mp4/);
-  assert.match(html, /\bisMp4\s*\(/);
-  assert.match(html, /\binspectMp4\s*\(/);
+  assert.match(html, /from\s+['"]\.\/file-meta-inspectors\.js['"]/);
+  const mp4 = read("tools/file-meta-mp4.js");
+  assert.match(mp4, /\bexport function match\s*\(/);
+  assert.match(mp4, /\bexport async function inspect\s*\(/);
+});
+
+test("file-meta 支持 JPEG 文件元信息", () => {
+  const html = read("tools/file-meta.html");
+  assert.match(html, /accept="[^"]*image\/jpeg/);
+  const jpeg = read("tools/file-meta-jpeg.js");
+  assert.match(jpeg, /\bexport function match\s*\(/);
+  assert.match(jpeg, /\bexport async function inspect\s*\(/);
+});
+
+test("file-meta 支持 PNG 文件元信息", () => {
+  const png = read("tools/file-meta-png.js");
+  assert.match(png, /\bexport function match\s*\(/);
+  assert.match(png, /\bexport async function inspect\s*\(/);
+});
+
+test("file-meta 共享模块导出渲染工具", () => {
+  const shared = read("tools/file-meta-shared.js");
+  for (const name of ["el", "makeGrid", "appendFileSection", "formatBytes", "formatAspectRatio"]) {
+    assert.match(shared, new RegExp(`export function ${name}\\s*\\(`));
+  }
 });
 
 for (const page of fileInputPages) {
