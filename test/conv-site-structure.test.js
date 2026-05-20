@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
-import { exists, read, pages, toolPages, hiddenPages, loadDom } from "./_helpers.js";
+import { exists, read, pages, toolPages, hiddenPages, loadDom, indexHrefFor } from "./_helpers.js";
 
 test("每个页面文件都存在", () => {
   for (const page of pages) {
@@ -15,7 +15,7 @@ test("首页通过 <a href> 链接到所有工具页和 hidden 页", async () =>
     [...dom.window.document.querySelectorAll("a[href]")].map((a) => a.getAttribute("href"))
   );
   for (const page of [...toolPages, ...hiddenPages]) {
-    assert.ok(hrefs.has(page), `index.html should link to ${page}`);
+    assert.ok(hrefs.has(indexHrefFor(page)), `index.html should link to ${page}`);
   }
   dom.window.close();
 });

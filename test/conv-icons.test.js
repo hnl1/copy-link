@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { abs, exists, read, pages, toolPages, hiddenPages } from "./_helpers.js";
+import { abs, exists, read, pages, toolPages, hiddenPages, assetsRelativePrefix, indexHrefFor } from "./_helpers.js";
 
 test("图标渲染细节只在 assets/styles/icon-button.css 内（消费方不能直接写 mask / --icon-url）", () => {
   // .icon-{name} 是图标的唯一对外接口；其它文件不能写 mask / --icon-url / var(--icon-X)。
@@ -78,7 +78,7 @@ test("favicon 配置覆盖每个页面，且每个页面都加载 favicons.js", 
 
   for (const page of pages) {
     const html = read(page);
-    const expectedSrc = page === "index.html" ? "assets/favicons.js" : "../assets/favicons.js";
+    const expectedSrc = assetsRelativePrefix(page) + "favicons.js";
     assert.match(
       html,
       new RegExp(`<script type="module" src="${expectedSrc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"></script>`),
@@ -97,8 +97,9 @@ test("首页 card / footer 图标 emoji 与 favicons.js MAP 一致", async () =>
   const html = read("index.html");
 
   for (const page of toolPages) {
+    const href = indexHrefFor(page);
     const cardPattern = new RegExp(
-      `<a[^>]*class="card"[^>]*href="${page.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[\\s\\S]*?<div class="icon">([^<]+)</div>`
+      `<a[^>]*class="card"[^>]*href="${href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[\\s\\S]*?<div class="icon">([^<]+)</div>`
     );
     const match = html.match(cardPattern);
     assert.ok(match, `index.html should have a card linking to ${page} with an icon`);

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { exists, read, loadDom } from "./_helpers.js";
 
-const PAGE = "tools/pdf-to-image.html";
-const UTILS = "tools/pdf-to-image-utils.js";
+const PAGE = "tools/pdf-to-image/index.html";
+const UTILS = "tools/pdf-to-image/utils.js";
 
 test("pdf-to-image 使用更短的页面名（PDF 转图片版）", () => {
   const html = read(PAGE);
@@ -123,8 +123,8 @@ test("pdf-to-image utils 模块对外暴露纯函数集合，并被页面 import
   const html = read(PAGE);
   assert.match(
     html,
-    /<script\s+type="module">[\s\S]*from\s+['"]\.\/pdf-to-image-utils\.js['"]/,
-    "pdf-to-image.html should import the utils module"
+    /<script\s+type="module">[\s\S]*from\s+['"]\.\/utils\.js['"]/,
+    "pdf-to-image/index.html should import the utils module"
   );
   // 这两条防止把已抽到 utils 的函数又在 inline script 里复制一份。
   assert.doesNotMatch(html, /\bfunction\s+formatFileSize\b/);

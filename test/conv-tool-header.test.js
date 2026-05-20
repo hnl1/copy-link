@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { read, toolPages } from "./_helpers.js";
+import { read, toolPages, assetsRelativePrefix } from "./_helpers.js";
 
 test("工具页都通过共享 ToolHeader 模块挂载", () => {
   for (const page of toolPages) {
     const html = read(page);
+    const assetsPrefix = assetsRelativePrefix(page).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(
       html,
-      /from\s+['"]\.\.\/assets\/components\/tool-header\/index\.js['"]/,
+      new RegExp(`from\\s+['"]${assetsPrefix}components/tool-header/index\\.js['"]`),
       `${page} should import the shared tool-header module`
     );
     assert.match(

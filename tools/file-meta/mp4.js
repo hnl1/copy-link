@@ -6,7 +6,7 @@ import {
   formatPixelCount,
   makeGrid,
   readAsciiView,
-} from './file-meta-shared.js';
+} from './shared.js';
 
 export function match(file) {
   const name = (file.name || '').toLowerCase();

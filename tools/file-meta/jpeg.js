@@ -6,7 +6,7 @@ import {
   latin1ToString,
   makeGrid,
   readAsciiBytes,
-} from './file-meta-shared.js';
+} from './shared.js';
 
 const JPEG_SOI = [0xFF, 0xD8];
 const JPEG_SOFS = new Set([

@@ -4,8 +4,8 @@ export const MAP = {
   'tools/video-compare.html': '🎬',
   'tools/image-compare.html': '🖼️',
   'tools/pdf-compare.html': '📄',
-  'tools/pdf-to-image.html': '🧾',
-  'tools/file-meta.html': '🏷️',
+  'tools/pdf-to-image/index.html': '🧾',
+  'tools/file-meta/index.html': '🏷️',
   'tools/icons.html': '🎨',
 };
 

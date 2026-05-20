@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>文件元信息</title>
-<script src="../assets/theme-init.js"></script>
-<script type="module" src="../assets/favicons.js"></script>
+<script src="../../assets/theme-init.js"></script>
+<script type="module" src="../../assets/favicons.js"></script>
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -249,10 +249,10 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 </style>
-<link rel="stylesheet" href="../assets/styles/tokens.css">
-<link rel="stylesheet" href="../assets/styles/tool-page.css">
-<link rel="stylesheet" href="../assets/components/tool-header/index.css">
-<link rel="stylesheet" href="../assets/components/file-input/index.css">
+<link rel="stylesheet" href="../../assets/styles/tokens.css">
+<link rel="stylesheet" href="../../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../../assets/components/tool-header/index.css">
+<link rel="stylesheet" href="../../assets/components/file-input/index.css">
 </head>
 <body class="tool-page">
 <div id="header-controls" hidden>
@@ -278,10 +278,10 @@
 </div>
 
 <script type="module">
-import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
-import { bind as bindFileInputDropZone } from '../assets/components/file-input/index.js';
-import { el } from './file-meta-shared.js';
-import { inspectFile, isSupportedFile, isMp4 } from './file-meta-inspectors.js';
+import { mount as mountToolHeader } from '../../assets/components/tool-header/index.js';
+import { bind as bindFileInputDropZone } from '../../assets/components/file-input/index.js';
+import { el } from './shared.js';
+import { inspectFile, isSupportedFile, isMp4 } from './inspectors.js';
 
 (() => {
   const headerControlsHost = document.getElementById('header-controls');

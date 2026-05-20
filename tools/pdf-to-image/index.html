@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDF 转图片版</title>
-<script src="../assets/theme-init.js"></script>
-<script type="module" src="../assets/favicons.js"></script>
+<script src="../../assets/theme-init.js"></script>
+<script type="module" src="../../assets/favicons.js"></script>
 <style>
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -459,10 +459,10 @@
     cursor: default;
   }
 </style>
-<link rel="stylesheet" href="../assets/styles/tokens.css">
-<link rel="stylesheet" href="../assets/styles/tool-page.css">
-<link rel="stylesheet" href="../assets/components/tool-header/index.css">
-<link rel="stylesheet" href="../assets/components/file-input/index.css">
+<link rel="stylesheet" href="../../assets/styles/tokens.css">
+<link rel="stylesheet" href="../../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../../assets/components/tool-header/index.css">
+<link rel="stylesheet" href="../../assets/components/file-input/index.css">
 </head>
 <body class="tool-page">
 <div id="header-controls" hidden>
@@ -511,12 +511,12 @@
   <div id="pdf-list" class="pdf-list" aria-live="polite" hidden></div>
 </main>
 
-<script src="../vendor/pdfjs/pdf.min.js"></script>
-<script src="../vendor/jspdf/jspdf.umd.min.js"></script>
+<script src="../../vendor/pdfjs/pdf.min.js"></script>
+<script src="../../vendor/jspdf/jspdf.umd.min.js"></script>
 <script type="module">
-import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
-import { bind as bindFileInputDropZone } from '../assets/components/file-input/index.js';
-import { create as createElapsedTimer } from '../assets/components/elapsed-timer.js';
+import { mount as mountToolHeader } from '../../assets/components/tool-header/index.js';
+import { bind as bindFileInputDropZone } from '../../assets/components/file-input/index.js';
+import { create as createElapsedTimer } from '../../assets/components/elapsed-timer.js';
 import {
   isPdfFile,
   makeOutputName,
@@ -527,9 +527,9 @@ import {
   formatHms,
   formatDuration,
   createZipBlob,
-} from './pdf-to-image-utils.js';
+} from './utils.js';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
 
 (() => {
   const headerControlsHost = document.getElementById('header-controls');
