@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VMess 转 Clash Party</title>
+<script src="../../assets/theme-init.js"></script>
+<script type="module" src="../../assets/favicons.js"></script>
+<link rel="stylesheet" href="../../assets/styles/tokens.css">
+<link rel="stylesheet" href="../../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../../assets/components/tool-header/index.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--ft-font);
+    background: var(--bg);
+    color: var(--text);
+  }
+  body.tool-page {
+    display: flex;
+    flex-direction: column;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 24px 32px;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--ft-radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .panel label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .panel .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 12px;
+    border: 1px solid var(--button-border);
+    border-radius: var(--ft-radius-md);
+    background: var(--surface-soft);
+    color: var(--text);
+    outline: none;
+  }
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+  #intermediate,
+  #output {
+    min-height: 200px;
+    background: var(--surface-2);
+  }
+  #output {
+    min-height: 280px;
+  }
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .step-tags span {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .button {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--ft-radius-sm);
+  }
+  .button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .button.primary:not(:disabled):hover {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+  #status {
+    font-size: 12px;
+    color: var(--text-muted);
+    flex: 1;
+    min-width: 120px;
+  }
+  #status.error { color: #ef4444; }
+  #status.warn { color: #f59e0b; }
+  #errors {
+    display: none;
+    font-size: 12px;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: var(--ft-radius-sm);
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  #errors.visible { display: block; }
+  @media (max-width: 640px) {
+    main { padding: 12px 16px 24px; }
+  }
+</style>
+</head>
+<body class="tool-page">
+<main>
+  <section class="panel">
+    <label for="input">VMess 链接 <span class="hint">每行一条 vmess://，支持 # 注释</span></label>
+    <textarea id="input" spellcheck="false" placeholder="vmess://..."></textarea>
+    <div class="toolbar">
+      <button type="button" class="button primary" id="convertBtn">转换</button>
+      <span id="status"></span>
+    </div>
+  </section>
+
+  <div id="errors" role="alert"></div>
+
+  <section class="panel" id="intermediatePanel" hidden>
+    <label for="intermediate">解析中间结果</label>
+    <div class="step-tags" aria-hidden="true">
+      <span class="step-label">流程</span>
+      <span>vmess:// 链接</span>
+      <span>→</span>
+      <span>vmess JSON</span>
+      <span>→</span>
+      <span>Clash 节点</span>
+      <span>→</span>
+      <span>完整 YAML</span>
+    </div>
+    <span class="hint">每条链接对应一项：vmess 为 Base64 解码后的原始字段，proxy 为映射后的 Clash 节点对象</span>
+    <textarea id="intermediate" readonly spellcheck="false"></textarea>
+  </section>
+
+  <section class="panel">
+    <label for="output">Clash Party 配置 YAML</label>
+    <div class="toolbar">
+      <button type="button" class="button" id="copyBtn" disabled>复制</button>
+      <button type="button" class="button" id="downloadBtn" disabled>下载 config.yaml</button>
+    </div>
+    <textarea id="output" readonly spellcheck="false" placeholder="转换结果将显示在这里"></textarea>
+  </section>
+</main>
+
+<script type="module">
+  import { mount as mountToolHeader } from '../../assets/components/tool-header/index.js';
+  import { convertVmessText } from './utils.js';
+
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const intermediate = document.getElementById('intermediate');
+  const intermediatePanel = document.getElementById('intermediatePanel');
+  const convertBtn = document.getElementById('convertBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const statusEl = document.getElementById('status');
+  const errorsEl = document.getElementById('errors');
+
+  let lastYaml = '';
+
+  function clearOutput() {
+    lastYaml = '';
+    output.value = '';
+    intermediate.value = '';
+    intermediatePanel.hidden = true;
+    copyBtn.disabled = true;
+    downloadBtn.disabled = true;
+  }
+
+  function setStatus(text, type = '') {
+    statusEl.textContent = text;
+    statusEl.className = type;
+  }
+
+  function showErrors(errors) {
+    if (!errors.length) {
+      errorsEl.classList.remove('visible');
+      errorsEl.textContent = '';
+      return;
+    }
+    errorsEl.classList.add('visible');
+    errorsEl.textContent = errors.map((e, i) => `${i + 1}. ${e.message}\n   ${e.line}`).join('\n');
+  }
+
+  function runConvert() {
+    try {
+      const result = convertVmessText(input.value);
+      lastYaml = result.yaml;
+      output.value = lastYaml;
+      intermediate.value = result.intermediate;
+      intermediatePanel.hidden = false;
+      copyBtn.disabled = false;
+      downloadBtn.disabled = false;
+
+      const count = result.proxies.length;
+      if (result.errors.length) {
+        setStatus(`已转换 ${count} 条，${result.errors.length} 条失败`, 'warn');
+        showErrors(result.errors);
+      } else {
+        setStatus(`已转换 ${count} 条节点`);
+        showErrors([]);
+      }
+    } catch (err) {
+      clearOutput();
+      setStatus(err instanceof Error ? err.message : String(err), 'error');
+      showErrors([]);
+    }
+  }
+
+  async function copyYaml() {
+    if (!lastYaml) return;
+    try {
+      await navigator.clipboard.writeText(lastYaml);
+      setStatus('已复制到剪贴板');
+      setTimeout(() => setStatus(''), 2000);
+    } catch {
+      setStatus('复制失败，请检查浏览器权限', 'error');
+    }
+  }
+
+  function downloadYaml() {
+    if (!lastYaml) return;
+    const blob = new Blob([lastYaml], { type: 'text/yaml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'config.yaml';
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus('已开始下载');
+    setTimeout(() => setStatus(''), 2000);
+  }
+
+  convertBtn.addEventListener('click', runConvert);
+  copyBtn.addEventListener('click', copyYaml);
+  downloadBtn.addEventListener('click', downloadYaml);
+
+  input.addEventListener('input', () => {
+    if (!input.value.trim()) {
+      clearOutput();
+      setStatus('');
+      showErrors([]);
+    }
+  });
+
+  document.addEventListener('paste', (e) => {
+    if (e.target === input || e.target === output || e.target === intermediate) return;
+    const text = e.clipboardData?.getData('text/plain') ?? '';
+    if (/^vmess:\/\//im.test(text)) {
+      e.preventDefault();
+      input.value = text.trim();
+      runConvert();
+    }
+  });
+
+  mountToolHeader({ title: 'VMess 转 Clash Party', back: '../../index.html' });
+</script>
+</body>
+</html>

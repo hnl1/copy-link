@@ -14,6 +14,7 @@ export const toolPages = [
   "tools/pdf-compare.html",
   "tools/pdf-to-image/index.html",
   "tools/file-meta/index.html",
+  "tools/vmess-to-clash/index.html",
 ];
 
 export const hiddenPages = ["tools/icons.html"];
