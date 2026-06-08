@@ -7,6 +7,7 @@ export const MAP = {
   'tools/pdf-to-image/index.html': '🧾',
   'tools/file-meta/index.html': '🏷️',
   'tools/vmess-to-clash/index.html': '🔀',
+  'tools/text-diff/index.html': '🆚',
   'tools/icons.html': '🎨',
 };
 

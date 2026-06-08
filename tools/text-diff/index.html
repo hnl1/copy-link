@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文本差异对比</title>
+<script src="../../assets/theme-init.js"></script>
+<script type="module" src="../../assets/favicons.js"></script>
+<link rel="stylesheet" href="../../assets/styles/tokens.css">
+<link rel="stylesheet" href="../../assets/styles/tool-page.css">
+<link rel="stylesheet" href="../../assets/components/tool-header/index.css">
+<style>
+  :root[data-theme="light"] {
+    --diff-del-line: rgba(239, 68, 68, 0.10);
+    --diff-add-line: rgba(34, 197, 94, 0.12);
+    --diff-del-gutter: rgba(239, 68, 68, 0.16);
+    --diff-add-gutter: rgba(34, 197, 94, 0.18);
+    --diff-del-gutter-text: #b91c1c;
+    --diff-add-gutter-text: #15803d;
+    --diff-del-word: rgba(239, 68, 68, 0.30);
+    --diff-add-word: rgba(34, 197, 94, 0.32);
+    --diff-del-word-text: #7f1d1d;
+    --diff-add-word-text: #14532d;
+  }
+  :root[data-theme="dark"] {
+    --diff-del-line: rgba(248, 81, 73, 0.10);
+    --diff-add-line: rgba(63, 185, 80, 0.10);
+    --diff-del-gutter: rgba(248, 81, 73, 0.22);
+    --diff-add-gutter: rgba(63, 185, 80, 0.22);
+    --diff-del-gutter-text: #ff9d96;
+    --diff-add-gutter-text: #7ee787;
+    --diff-del-word: #e5534b;
+    --diff-add-word: #2f9e44;
+    --diff-del-word-text: #fff;
+    --diff-add-word-text: #fff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--ft-font);
+    background: var(--bg);
+    color: var(--text);
+  }
+  body.tool-page {
+    display: flex;
+    flex-direction: column;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 24px 32px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--ft-radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .panel label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .panel .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 12px;
+    border: 1px solid var(--button-border);
+    border-radius: var(--ft-radius-md);
+    background: var(--surface-soft);
+    color: var(--text);
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .button {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--ft-radius-sm);
+  }
+  .button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .button.primary:not(:disabled):hover {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+  .seg {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--ft-radius-sm);
+  }
+  body.tool-page .seg button {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 4px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  body.tool-page .seg button:not(:disabled):hover {
+    background: var(--surface-hover);
+    border-color: transparent;
+    color: var(--text);
+  }
+  body.tool-page .seg button.active,
+  body.tool-page .seg button.active:not(:disabled):hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  #stats {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 12px;
+  }
+  #stats .add { color: #16a34a; }
+  #stats .del { color: #dc2626; }
+  #status {
+    font-size: 12px;
+    color: var(--text-muted);
+    flex: 1;
+    min-width: 80px;
+  }
+  #status.error { color: #ef4444; }
+  #status.warn { color: #f59e0b; }
+
+  .diff-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--ft-radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: auto;
+    max-height: 70vh;
+  }
+  .diff {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    width: 100%;
+  }
+  .diff-split {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+  }
+  .diff-unified {
+    display: grid;
+    grid-template-columns: max-content max-content minmax(0, 1fr);
+  }
+  .diff .gutter {
+    text-align: right;
+    padding: 0 8px;
+    color: var(--text-faint);
+    background: var(--surface-2);
+    user-select: none;
+    white-space: nowrap;
+    border-right: 1px solid var(--border);
+  }
+  .diff-split .gutter.col-b { border-left: 1px solid var(--border); }
+  .diff .code {
+    padding: 0 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    min-height: 1.55em;
+  }
+  .code-del { background: var(--diff-del-line); }
+  .code-add { background: var(--diff-add-line); }
+  .gutter-del { background: var(--diff-del-gutter); color: var(--diff-del-gutter-text); }
+  .gutter-add { background: var(--diff-add-gutter); color: var(--diff-add-gutter-text); }
+  .filler { background: var(--surface-2); }
+  .w-del {
+    background: var(--diff-del-word);
+    color: var(--diff-del-word-text);
+    font-weight: 600;
+    border-radius: 2px;
+  }
+  .w-add {
+    background: var(--diff-add-word);
+    color: var(--diff-add-word-text);
+    font-weight: 600;
+    border-radius: 2px;
+  }
+  .empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
+  @media (max-width: 760px) {
+    .inputs { grid-template-columns: 1fr; }
+    main { padding: 12px 16px 24px; }
+  }
+</style>
+</head>
+<body class="tool-page">
+<main>
+  <section class="inputs">
+    <div class="panel">
+      <label for="inputA">原文本</label>
+      <textarea id="inputA" spellcheck="false" placeholder="粘贴第一段文本…"></textarea>
+    </div>
+    <div class="panel">
+      <label for="inputB">新文本</label>
+      <textarea id="inputB" spellcheck="false" placeholder="粘贴第二段文本…"></textarea>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <div class="seg" role="tablist" aria-label="视图模式">
+      <button type="button" id="viewSplit" class="active">并排</button>
+      <button type="button" id="viewUnified">统一</button>
+    </div>
+    <span id="stats"></span>
+    <span id="status"></span>
+  </div>
+
+  <div class="diff-wrap">
+    <div class="diff" id="diff"><div class="empty">在上方粘贴两段文本，自动对比差异</div></div>
+  </div>
+</main>
+
+<script type="module">
+  import { mount as mountToolHeader } from '../../assets/components/tool-header/index.js';
+  import { computeDiff } from './utils.js';
+
+  const inputA = document.getElementById('inputA');
+  const inputB = document.getElementById('inputB');
+  const viewSplitBtn = document.getElementById('viewSplit');
+  const viewUnifiedBtn = document.getElementById('viewUnified');
+  const statsEl = document.getElementById('stats');
+  const statusEl = document.getElementById('status');
+  const diffEl = document.getElementById('diff');
+
+  let view = 'split';
+  let lastResult = null;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
+  }
+
+  function renderParts(parts) {
+    if (!parts.length) return '';
+    let html = '';
+    for (const p of parts) {
+      const text = escapeHtml(p.text);
+      if (p.type === 'del') html += `<span class="w-del">${text}</span>`;
+      else if (p.type === 'add') html += `<span class="w-add">${text}</span>`;
+      else html += text;
+    }
+    return html;
+  }
+
+  function codeClass(type) {
+    if (type === 'del') return 'code code-del';
+    if (type === 'add') return 'code code-add';
+    return 'code';
+  }
+
+  function gutterClass(type, col) {
+    let cls = `gutter col-${col}`;
+    if (type === 'del') cls += ' gutter-del';
+    else if (type === 'add') cls += ' gutter-add';
+    return cls;
+  }
+
+  function renderSplit(rows) {
+    const out = [];
+    for (const row of rows) {
+      const l = row.left;
+      const r = row.right;
+      if (l) {
+        out.push(`<div class="${gutterClass(l.type, 'a')}">${l.no}</div>`);
+        out.push(`<div class="${codeClass(l.type)}">${renderParts(l.parts)}</div>`);
+      } else {
+        out.push('<div class="gutter col-a filler"></div>');
+        out.push('<div class="code filler"></div>');
+      }
+      if (r) {
+        out.push(`<div class="${gutterClass(r.type, 'b')}">${r.no}</div>`);
+        out.push(`<div class="${codeClass(r.type)}">${renderParts(r.parts)}</div>`);
+      } else {
+        out.push('<div class="gutter col-b filler"></div>');
+        out.push('<div class="code filler"></div>');
+      }
+    }
+    return out.join('');
+  }
+
+  function renderUnified(rows) {
+    const out = [];
+    for (const row of rows) {
+      out.push(`<div class="${gutterClass(row.type, 'a')}">${row.aNo ?? ''}</div>`);
+      out.push(`<div class="${gutterClass(row.type, 'b')}">${row.bNo ?? ''}</div>`);
+      out.push(`<div class="${codeClass(row.type)}">${renderParts(row.parts)}</div>`);
+    }
+    return out.join('');
+  }
+
+  function render() {
+    if (!lastResult) return;
+    if (view === 'split') {
+      diffEl.className = 'diff diff-split';
+      diffEl.innerHTML = renderSplit(lastResult.sideRows);
+    } else {
+      diffEl.className = 'diff diff-unified';
+      diffEl.innerHTML = renderUnified(lastResult.unifiedRows);
+    }
+  }
+
+  function setStatus(text, type = '') {
+    statusEl.textContent = text;
+    statusEl.className = type;
+  }
+
+  function showStats(stats) {
+    if (!stats) {
+      statsEl.innerHTML = '';
+      return;
+    }
+    statsEl.innerHTML =
+      `<span class="add">+${stats.added}</span>` +
+      `<span class="del">-${stats.removed}</span>` +
+      `<span>共 ${stats.same} 行相同</span>`;
+  }
+
+  function runDiff() {
+    const a = inputA.value;
+    const b = inputB.value;
+    if (!a.trim() && !b.trim()) {
+      lastResult = null;
+      diffEl.className = 'diff';
+      diffEl.innerHTML = '<div class="empty">在上方粘贴两段文本，自动对比差异</div>';
+      showStats(null);
+      setStatus('');
+      return;
+    }
+    try {
+      lastResult = computeDiff(a, b);
+      render();
+      showStats(lastResult.stats);
+      if (lastResult.stats.added === 0 && lastResult.stats.removed === 0) {
+        setStatus('两段文本完全相同');
+      } else {
+        setStatus('');
+      }
+    } catch (err) {
+      lastResult = null;
+      diffEl.className = 'diff';
+      diffEl.innerHTML = '<div class="empty">对比失败</div>';
+      showStats(null);
+      setStatus(err instanceof Error ? err.message : String(err), 'error');
+    }
+  }
+
+  function setView(next) {
+    view = next;
+    viewSplitBtn.classList.toggle('active', view === 'split');
+    viewUnifiedBtn.classList.toggle('active', view === 'unified');
+    render();
+  }
+
+  let debounceTimer = 0;
+  function scheduleDiff() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(runDiff, 250);
+  }
+
+  inputA.addEventListener('input', scheduleDiff);
+  inputB.addEventListener('input', scheduleDiff);
+  viewSplitBtn.addEventListener('click', () => setView('split'));
+  viewUnifiedBtn.addEventListener('click', () => setView('unified'));
+
+  mountToolHeader({ title: '文本差异对比', back: '../../index.html' });
+</script>
+</body>
+</html>
