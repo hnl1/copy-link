@@ -11,6 +11,7 @@ export const toolPages = [
   "tools/clipboard.html",
   "tools/video-compare.html",
   "tools/image-compare.html",
+  "tools/audio-waveform.html",
   "tools/pdf-compare.html",
   "tools/pdf-to-image/index.html",
   "tools/file-meta/index.html",
@@ -25,6 +26,7 @@ export const pages = ["index.html", ...toolPages, ...hiddenPages];
 export const fileInputPages = [
   "tools/video-compare.html",
   "tools/image-compare.html",
+  "tools/audio-waveform.html",
   "tools/pdf-compare.html",
   "tools/pdf-to-image/index.html",
   "tools/file-meta/index.html",
