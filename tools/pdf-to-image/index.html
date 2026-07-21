@@ -518,6 +518,11 @@ import { mount as mountToolHeader } from '../../assets/components/tool-header/in
 import { bind as bindFileInputDropZone } from '../../assets/components/file-input/index.js';
 import { create as createElapsedTimer } from '../../assets/components/elapsed-timer.js';
 import {
+  cleanupExpiredPdfHandoffs,
+  deletePdfHandoff,
+  putPdfHandoff,
+} from '../../assets/pdf-handoff-store.js';
+import {
   isPdfFile,
   makeOutputName,
   getDisplayPathSeparator,
@@ -530,6 +535,9 @@ import {
 } from './utils.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
+cleanupExpiredPdfHandoffs().catch((error) => {
+  console.warn('cleanup expired PDF handoffs failed', error);
+});
 
 (() => {
   const headerControlsHost = document.getElementById('header-controls');
@@ -1048,35 +1056,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
     URL.revokeObjectURL(url);
   }
 
-  function openPdfsDb() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('f-tools-pdfs', 1);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains('pdfs')) {
-          db.createObjectStore('pdfs', { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  async function putPdfs(record) {
-    const db = await openPdfsDb();
-    try {
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('pdfs', 'readwrite');
-        tx.objectStore('pdfs').put(record);
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-        tx.onabort = () => reject(tx.error);
-      });
-    } finally {
-      db.close();
-    }
-  }
-
   function makePdfsId() {
     if (crypto && crypto.randomUUID) return crypto.randomUUID();
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -1084,7 +1063,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
 
   async function storeForCompare(sourceFile, outputBlob, outputName) {
     const id = makePdfsId();
-    await putPdfs({
+    await putPdfHandoff({
       id,
       createdAt: Date.now(),
       files: [
@@ -1102,7 +1081,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
     });
     const compareUrl = new URL('../pdf-compare.html', window.location.href);
     compareUrl.searchParams.set('pdfs', id);
-    return compareUrl.href;
+    return { id, url: compareUrl.href };
   }
 
   async function openCompareForItem(item) {
@@ -1114,11 +1093,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
     }
     compareWindow.opener = null;
     item.elements.compareBtn.disabled = true;
+    let handoffId = null;
     try {
-      const url = await storeForCompare(item.file, item.outputBlob, item.outputName);
-      compareWindow.location.replace(url);
+      const handoff = await storeForCompare(item.file, item.outputBlob, item.outputName);
+      handoffId = handoff.id;
+      if (compareWindow.closed) throw new Error('对比窗口已关闭。');
+      compareWindow.location.replace(handoff.url);
     } catch (error) {
       compareWindow.close();
+      if (handoffId) {
+        try { await deletePdfHandoff(handoffId); } catch (cleanupError) {
+          console.warn('cleanup failed PDF handoff failed', cleanupError);
+        }
+      }
       console.error('open compare failed', error);
       log('打开对比页失败：' + (error && error.message ? error.message : String(error)), true);
     } finally {

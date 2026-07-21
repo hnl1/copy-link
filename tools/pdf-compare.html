@@ -212,8 +212,15 @@
 import { mount as mountToolHeader } from '../assets/components/tool-header/index.js';
 import { bind as bindFileInputDropZone } from '../assets/components/file-input/index.js';
 import { mount as mountDropdownSingleSelect } from '../assets/components/dropdown-single-select/index.js';
+import {
+  cleanupExpiredPdfHandoffs,
+  takePdfHandoff,
+} from '../assets/pdf-handoff-store.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
+cleanupExpiredPdfHandoffs().catch((error) => {
+  console.warn('cleanup expired PDF handoffs failed', error);
+});
 
 (() => {
   const headerControlsHost = document.getElementById('header-controls');
@@ -266,49 +273,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
 
   loadPdfsFromUrl();
 
-  function openPdfsDb() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('f-tools-pdfs', 1);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains('pdfs')) {
-          db.createObjectStore('pdfs', { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  async function getPdfs(id) {
-    const db = await openPdfsDb();
-    try {
-      return await new Promise((resolve, reject) => {
-        const tx = db.transaction('pdfs', 'readonly');
-        const request = tx.objectStore('pdfs').get(id);
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
-      });
-    } finally {
-      db.close();
-    }
-  }
-
-  async function deletePdfs(id) {
-    const db = await openPdfsDb();
-    try {
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('pdfs', 'readwrite');
-        tx.objectStore('pdfs').delete(id);
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-        tx.onabort = () => reject(tx.error);
-      });
-    } finally {
-      db.close();
-    }
-  }
-
   function clearUrlParams() {
     const url = new URL(window.location.href);
     window.history.replaceState(null, '', url.pathname);
@@ -321,7 +285,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
     if (!pdfsId) return;
 
     try {
-      const record = await getPdfs(pdfsId);
+      const record = await takePdfHandoff(pdfsId);
       if (!record || !Array.isArray(record.files) || record.files.length === 0) {
         return;
       }
@@ -332,7 +296,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
         { type: entry.type || 'application/pdf' }
       ));
       await fileDropZone.acceptFiles(files);
-      await deletePdfs(pdfsId);
     } catch (err) {
       console.error(err);
     }

@@ -268,7 +268,12 @@
 
     <script type="module">
         import { create as createThemeToggle } from './assets/components/theme-toggle.js';
+        import { cleanupExpiredPdfHandoffs } from './assets/pdf-handoff-store.js';
+
         document.getElementById('theme-toggle-host').appendChild(createThemeToggle());
+        cleanupExpiredPdfHandoffs().catch((error) => {
+            console.warn('cleanup expired PDF handoffs failed', error);
+        });
     </script>
 </body>
 </html>
