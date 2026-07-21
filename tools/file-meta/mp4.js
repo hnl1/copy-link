@@ -120,12 +120,18 @@ function parseTrak(view, trak) {
   const mdia = findMp4Child(view, trak, 'mdia');
   const mdhd = mdia ? findMp4Child(view, mdia, 'mdhd') : null;
   const hdlr = mdia ? findMp4Child(view, mdia, 'hdlr') : null;
-  const stsd = findNestedMp4Child(view, mdia, ['minf', 'stbl', 'stsd']);
+  const stbl = findNestedMp4Child(view, mdia, ['minf', 'stbl']);
+  const stsd = stbl ? findMp4Child(view, stbl, 'stsd') : null;
+  const stts = stbl ? findMp4Child(view, stbl, 'stts') : null;
+  const stsz = stbl ? findMp4Child(view, stbl, 'stsz') : null;
+  const stz2 = stbl ? findMp4Child(view, stbl, 'stz2') : null;
   return {
     tkhd: tkhd ? parseTkhd(view, tkhd) : null,
     mdhd: mdhd ? parseMdhd(view, mdhd) : null,
     hdlr: hdlr ? parseHdlr(view, hdlr) : null,
     codecs: stsd ? parseStsd(view, stsd) : [],
+    timing: stts ? parseStts(view, stts) : null,
+    sampleCount: stsz ? parseSampleCount(view, stsz) : stz2 ? parseSampleCount(view, stz2) : null,
   };
 }
 
@@ -190,6 +196,27 @@ function parseStsd(view, box) {
   return codecs;
 }
 
+function parseStts(view, box) {
+  if (box.dataStart + 8 > box.end) return null;
+  const entryCount = view.getUint32(box.dataStart + 4);
+  let offset = box.dataStart + 8;
+  let sampleCount = 0;
+  let duration = 0;
+  for (let i = 0; i < entryCount; i++) {
+    if (offset + 8 > box.end) return null;
+    const count = view.getUint32(offset);
+    const delta = view.getUint32(offset + 4);
+    sampleCount += count;
+    duration += count * delta;
+    offset += 8;
+  }
+  return { sampleCount, duration };
+}
+
+function parseSampleCount(view, box) {
+  return box.dataStart + 12 <= box.end ? view.getUint32(box.dataStart + 8) : null;
+}
+
 function readUint64(view, offset) {
   return view.getUint32(offset) * 4294967296 + view.getUint32(offset + 4);
 }
@@ -223,6 +250,16 @@ function formatHandlerType(handlerType) {
   return names[handlerType] ? `${names[handlerType]}（${handlerType}）` : handlerType;
 }
 
+function formatFrameRate(track) {
+  const timescale = track.mdhd?.timescale;
+  const sampleCount = track.timing?.sampleCount;
+  const duration = track.timing?.duration;
+  if (!timescale || !sampleCount || !duration) return '—';
+  const frameRate = sampleCount * timescale / duration;
+  if (!Number.isFinite(frameRate) || frameRate <= 0) return '—';
+  return `${Number(frameRate.toFixed(3))} fps`;
+}
+
 function renderMp4Meta(container, file, boxes, parsed) {
   container.innerHTML = '';
   appendFileSection(container, file);
@@ -251,42 +288,34 @@ function renderMp4Meta(container, file, boxes, parsed) {
   }
 
   if (parsed.movie?.tracks.length) {
-    const table = el('table', { class: 'chunks-table' });
-    table.appendChild(el('thead', null,
-      el('tr', null,
-        el('th', { text: '#' }),
-        el('th', { text: '类型' }),
-        el('th', { text: 'Track ID' }),
-        el('th', { text: '时长' }),
-        el('th', { text: '尺寸' }),
-        el('th', { text: '总像素量' }),
-        el('th', { text: 'Codec' }),
-        el('th', { text: '名称' }),
-      ),
-    ));
-    const tbody = el('tbody');
     parsed.movie.tracks.forEach((track, i) => {
       const width = track.tkhd?.width || 0;
       const height = track.tkhd?.height || 0;
       const size = width && height
         ? `${Math.round(width)} × ${Math.round(height)}（宽高比 ${formatAspectRatio(Math.round(width), Math.round(height))}）`
         : '—';
-      tbody.appendChild(el('tr', null,
-        el('td', { class: 'num', text: String(i + 1) }),
-        el('td', { text: formatHandlerType(track.hdlr?.handlerType || '未知') }),
-        el('td', { class: 'num', text: track.tkhd?.trackId ? String(track.tkhd.trackId) : '—' }),
-        el('td', { text: formatDuration(track.mdhd?.duration ?? track.tkhd?.duration, track.mdhd?.timescale ?? parsed.movie.mvhd?.timescale) }),
-        el('td', { text: size }),
-        el('td', { text: width && height ? formatPixelCount(width, height) : '—' }),
-        el('td', { class: 'mono', text: track.codecs.length ? track.codecs.join(', ') : '—' }),
-        el('td', { text: track.hdlr?.name || '—' }),
+      const handlerType = track.hdlr?.handlerType || '未知';
+      const rows = [
+        ['Track ID', track.tkhd?.trackId ? String(track.tkhd.trackId) : '—'],
+        ['时长', formatDuration(track.mdhd?.duration ?? track.tkhd?.duration, track.mdhd?.timescale ?? parsed.movie.mvhd?.timescale)],
+      ];
+      if (handlerType === 'vide') {
+        rows.push(
+          ['尺寸', size],
+          ['总像素量', width && height ? formatPixelCount(width, height) : '—'],
+          ['平均帧率', formatFrameRate(track)],
+          ['总帧数', track.sampleCount == null ? '—' : track.sampleCount.toLocaleString()],
+        );
+      }
+      rows.push(
+        ['Codec', track.codecs.length ? track.codecs.join(', ') : '—'],
+        ['名称', track.hdlr?.name || '—'],
+      );
+      container.appendChild(el('section', { class: 'meta-section' },
+        el('h2', { text: `${formatHandlerType(handlerType)} Track #${i + 1}` }),
+        makeGrid(rows),
       ));
     });
-    table.appendChild(tbody);
-    container.appendChild(el('section', { class: 'meta-section' },
-      el('h2', { text: `Tracks（共 ${parsed.movie.tracks.length} 个）` }),
-      table,
-    ));
   }
 
   const table = el('table', { class: 'chunks-table' });
