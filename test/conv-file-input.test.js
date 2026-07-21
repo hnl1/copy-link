@@ -45,6 +45,14 @@ test("file-input.js 支持目录选择", () => {
   }
 });
 
+test("pdf-to-image 从子目录正确跳转到 PDF 对比页", () => {
+  const html = read("tools/pdf-to-image/index.html");
+  assert.match(html, /new URL\(['"]\.\.\/pdf-compare\.html['"],\s*window\.location\.href\)/);
+  assert.match(html, /window\.open\(['"]about:blank['"],\s*['"]_blank['"]\)/);
+  assert.match(html, /compareWindow\.location\.replace\(url\)/);
+  assert.doesNotMatch(html, /return\s+`pdf-compare\.html\?pdfs=/);
+});
+
 test("clipboard 工具不加载共享 file-input.js", () => {
   assert.doesNotMatch(read("tools/clipboard.html"), /assets\/file-input\.js/);
 });

@@ -1100,16 +1100,25 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdfjs/pdf.worker.min.js';
         },
       ],
     });
-    return `pdf-compare.html?pdfs=${encodeURIComponent(id)}`;
+    const compareUrl = new URL('../pdf-compare.html', window.location.href);
+    compareUrl.searchParams.set('pdfs', id);
+    return compareUrl.href;
   }
 
   async function openCompareForItem(item) {
     if (!item.outputBlob) return;
+    const compareWindow = window.open('about:blank', '_blank');
+    if (!compareWindow) {
+      log('打开对比页失败：浏览器阻止了新窗口，请允许本站打开弹窗。', true);
+      return;
+    }
+    compareWindow.opener = null;
     item.elements.compareBtn.disabled = true;
     try {
       const url = await storeForCompare(item.file, item.outputBlob, item.outputName);
-      window.open(url, '_blank', 'noopener');
+      compareWindow.location.replace(url);
     } catch (error) {
+      compareWindow.close();
       console.error('open compare failed', error);
       log('打开对比页失败：' + (error && error.message ? error.message : String(error)), true);
     } finally {
